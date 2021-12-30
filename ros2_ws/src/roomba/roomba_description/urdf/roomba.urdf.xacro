@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<robot name="roomba" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find create_description)/urdf/create_base.urdf.xacro"/>
+  <xacro:include filename="$(find roomba_description)/urdf/common.xacro"/>
+  <xacro:include filename="$(find roomba_description)/urdf/sensors/rplidar.urdf.xacro"/>
+
+  <xacro:create_base wheel_separation="0.235" base_diameter="0.3485">
+    <mesh filename="package://create_description/meshes/create_2.dae"/>
+  </xacro:create_base>
+
+  <link name="lidar_base">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.14 0.14 0.12"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1.0 1.0 1.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.14 0.14 0.12"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="lidar_base_to_base_link" type="fixed">
+    <origin xyz="0 0 0.09" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="lidar_base"/>
+  </joint>
+
+  <xacro:rplidar prefix="rplidar" parent="lidar_base">
+    <origin xyz="-0.05 0.0 0.06" rpy="0 0 ${PI}"/>
+  </xacro:rplidar>
+
+  <!-- Gazebo -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/roomba</robotNamespace>
+    </plugin>
+  </gazebo>
+  <xacro:rplidar_gazebo prefix="rplidar" min_rad="${-PI}" max_rad="${PI}" min_range="0.15" max_range="6"/>
+</robot>
